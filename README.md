@@ -13,6 +13,24 @@ These scripts automate visible website controls. They do not provide paid access
 | [Chaython's Kimi K3 Auto Retry](./Chaython%27s%20Kimi%20K3%20Auto%20Retry) | [Kimi](https://www.kimi.ai/) | Detects Kimi's “Too many people are chatting with Kimi” dialog, dismisses it, and retries the captured prompt. |
 | [Chaython's Z.ai Auto Retry](./Chaython%27s%20Z.ai%20Auto%20Retry.user.js) | [Z.ai](https://chat.z.ai/) | Detects a Z.ai capacity/overload warning, dismisses it, and retries the last prompt. |
 
+## Install
+
+1. Install a userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
+2. Open the script's **raw** GitHub URL, or install it from the userscript manager using the raw URL.
+3. Review the script permissions and code, then confirm installation.
+4. Visit the matching AI website.
+
+Each script includes `@updateURL` and `@downloadURL` metadata pointing to its raw file in this repository, so Tampermonkey can check for updates.
+
+## Safety and behavior
+
+- ChatGPT Auto Continue clicks a visible Continue control when available. If none appears, it can submit `continue` after a response appears to stop mid-thought. The fallback waits 10 seconds, only uses an empty composer, and allows up to 8 continuation attempts per response.
+- Claude Auto Continue only acts on Claude's usage-pause warning and its **Continue** button. It interprets the displayed reset time using the browser's local timezone; keep the Claude tab open, because browsers may throttle timers in background tabs.
+- The Kimi and Z.ai scripts cap retries and avoid replacing a different draft where supported.
+- Website interfaces can change, so selectors may need maintenance.
+- These scripts cannot guarantee that a response will complete.
+- Review userscript code before installing it, and only install scripts you trust.
+
 ## Other free AI services
 
 These services offer free consumer access or free hosted model endpoints as of October 2026. Free access does **not** mean unlimited access: quotas, models, features, and availability can change by region, account, demand, and provider policy. Check the provider's current plan details before relying on a particular limit.
@@ -51,24 +69,6 @@ These services offer free consumer access or free hosted model endpoints as of O
 - **Regional and account differences:** Limits can depend on country, age, account status, staged rollouts, or provider policy. Providers can change limits without notice.
 
 The services above are alternatives, not guarantees of unlimited free use. Quota numbers described as third-party reports or account-dependent features should be treated as estimates, not promises. This repository's scripts only automate the specific visible controls described in the **Userscripts** table; they do not currently automate every service listed here.
-
-## Install
-
-1. Install a userscript manager such as [Tampermonkey](https://www.tampermonkey.net/).
-2. Open the script's **raw** GitHub URL, or install it from the userscript manager using the raw URL.
-3. Review the script permissions and code, then confirm installation.
-4. Visit the matching AI website.
-
-Each script includes `@updateURL` and `@downloadURL` metadata pointing to its raw file in this repository, so Tampermonkey can check for updates.
-
-## Safety and behavior
-
-- ChatGPT Auto Continue clicks a visible Continue control when available. If none appears, it can submit `continue` after a response appears to stop mid-thought. The fallback waits 10 seconds, only uses an empty composer, and allows up to 8 continuation attempts per response.
-- Claude Auto Continue only acts on Claude's usage-pause warning and its **Continue** button. It interprets the displayed reset time using the browser's local timezone; keep the Claude tab open, because browsers may throttle timers in background tabs.
-- The Kimi and Z.ai scripts cap retries and avoid replacing a different draft where supported.
-- Website interfaces can change, so selectors may need maintenance.
-- These scripts cannot guarantee that a response will complete.
-- Review userscript code before installing it, and only install scripts you trust.
 
 ## Support
 
