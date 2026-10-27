@@ -49,8 +49,15 @@
     const target = new Date(now);
     target.setHours(hour, minute, 0, 0);
 
-    // A reset time earlier today is treated as tomorrow, which also avoids
-    // repeatedly clicking against an already-expired/stale banner.
+    // Keep the already-scheduled deadline after it passes; otherwise a scan
+    // at 5:10 PM would misread the same displayed time as tomorrow at 5:10 PM.
+    if (scheduledTime &&
+        new Date(scheduledTime).getHours() === hour &&
+        new Date(scheduledTime).getMinutes() === minute) {
+      return new Date(scheduledTime);
+    }
+    // If the displayed time has already passed and no deadline was captured,
+    // assume the next occurrence is tomorrow rather than clicking immediately.
     if (target.getTime() <= now.getTime()) target.setDate(target.getDate() + 1);
     return target;
   }
@@ -93,13 +100,6 @@
     }
 
     const text = normalize(banner.innerText || banner.textContent);
-    const parsed = parseResetTime(text);
-    if (parsed && Math.abs(parsed.getTime() - expectedTime) > 60000) {
-      log('The reset time changed; rescheduling.');
-      scan();
-      return;
-    }
-
     const button = findContinueButton(banner);
     if (isEnabled(button)) {
       if (Date.now() - lastClickAt < 5000) return;
