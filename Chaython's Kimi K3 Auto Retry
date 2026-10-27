@@ -1,0 +1,385 @@
+// ==UserScript==
+// @name         Chaython's Kimi K3 Auto Retry
+// @namespace    https://www.kimi.ai/
+// @version      2.1.0
+// @author       Chaython
+// @description  Automatically dismisses Kimi capacity warnings and retries your message.
+// @icon         data:image/webp;base64,UklGRtIEAABXRUJQVlA4IMYEAACQJgCdASrYANgAPp1KokulpCOho7aKeLATiWdu4Wo17mM/+TG+s8IZoE/ZdrccYSvzL9ADzcuo59ADpWf3DylfxR/m5wHfB2AN6d7f5jdxRxpBgD/U8q3037B/639Wn9yCJPh3LxIMdUTYGt24kCm430HQA+TNW1X3mwALMAse+PsZCMsxAA2z+0Oo6qgX2dPjLdQk9S1XPX9bbY7nEtmSSr/Py1FG251i1ZgwnYA66UjJW42lJpQ+mdL3poVQihM4WFv8vLQbHSALDPVHcZyx24gpBsUUoQjQ4LcWj5RikeMuKGQy0tUfaU5zwZQg0alT765tpq/Cr80i7qPjcdmEE97uEDJom8pENo39AKGzjUfauR8rKnGFMnVCeDRwZ4ccy5BtUae4h27LMzflc5QShrk2uoIBTDuZaSOwAAD+/VdI/moUXbSkALxHJ4wXV9O76LHWbk/VpfmhsE4TWV29ybcpxbvvFku69HniQ8oLq4febAkmehSBc/kMdY4z0Z9vNeJFQnF4ivxyU0b1bcjG0Te/dm1IJuU/s4LbnNRFNPWA6nAVA4ixdrxturVJlXCsHTjZIgt5fwQYvV/A+LgiUuY02RgHpXqiK/RA2DMtfeOgkzsFDKatf4CYc9/8JdLyjyO08VARBq+DPlXwWEbBvgAdRe5WBW9ubUH1fPPTeXdkZxfgiPZaIrKXq/njN9BvhGwP/cdLRVDp8uAkOAvPAlUDt9mwHT+S76BnEkgeXC1l/HwRRga0qq8SxMpnp2mC9jY1xltK17D/3jON9KoJmC+Za0xQukSdXZqQt1+GHpOU+YQ0KqZgm56OZqij/ZjgpMfNelubnkr3zOu3NZybFG7L9KrIu3R+uz1M/U1VO4T0Qr7PeSZVPjfixpd6TqSEHNmPVQFfxHaLfflH9aFMrM0eW2em/zi+pK1zePAqBMpsEDN3hcwgGBY/fh33mkx54LBRijl18DRSJ/UzxZc7sYLcTUTyhSlz9oShs50zLWttLX56IGQC+kbTEYy4J0JRfAkf5VdpDUVs50hOfjVYc6d4H+2EcJjRkCpjyksQNsoOS3anch2PISZ1jAm4OV+S5n4gIAEDSee9p5n3upqh/ysoJfJXD3a24Sry6HM0qPvb7Kg9VpWBlWm1lemljMJRexrOh1QDBCY+DkjeT45IekzAiEJciBO2LkLxeDwplcvET+VtPA53S+pLU3kQ0xl8A+eh4e9wn664Mtv8DTZNfxmEXri1cHne7528jARyWn01Hw6mHHyf6Y/UouoUaucX8mNP4a2gB4JylaqJTnO84Ab0fGwnKkGxvxxtYU24cN771hSQPDW7XMDz8co7yJeiiv1Kia70SWq9rZTwKqks3we8dftr4f9aqO5l9yovcxkFWVy0RTMZlDZ5mb3jihrJRcqO3l8b7LyuG3P+Neq0lGLhEWQICOzNPh9OMLI1kWIwTqW8R7LW+9bzBhPCC/kh//6bKWPwHfAGSYUQ9UBLjHXKPVkYpB8LlYri3Z7IUYLG6itkRx/icOrPO/rsjzLDcgzEHEUrZzSsM/xGE4i/XWE4RsqTlzqXDITQS+0IAAol/e6g2D3T4C3EhWC8KMhgkWukHPjA3NShwVP9MLbhc5wAAAAA
+// @homepageURL  https://github.com/Chaython
+// @match        https://www.kimi.ai/*
+// @run-at       document-idle
+// @grant        none
+// ==/UserScript==
+
+ (() => {
+   'use strict';
+
+   const MAX_RETRIES = 10;
+   const FIRST_RETRY_DELAY_MS = 3000;
+   const MAX_RETRY_DELAY_MS = 30000;
+   const DIALOG_SELECTOR = '[data-testid="confirm-dialog"]';
+   const CAPACITY_TEXT = 'Too many people are chatting with Kimi';
+
+   let savedMessage = '';
+   let retryCount = 0;
+   let retryTimer = null;
+   let handlingDialog = false;
+   let lastSubmitAt = 0;
+
+   const log = (...args) => console.info('[Kimi Auto Retry]', ...args);
+   const norm = value => (value || '').replace(/\s+/g, ' ').trim();
+
+   function isVisible(el) {
+     if (!el || !el.isConnected) return false;
+     const style = getComputedStyle(el);
+     const rect = el.getBoundingClientRect();
+
+     return style.display !== 'none' &&
+       style.visibility !== 'hidden' &&
+       rect.width > 0 &&
+       rect.height > 0;
+   }
+
+   function getComposer() {
+     const candidates = [
+       ...document.querySelectorAll(
+         'textarea, [contenteditable="true"], [role="textbox"]'
+       )
+     ].filter(el =>
+       isVisible(el) &&
+       !el.closest(DIALOG_SELECTOR) &&
+       !el.matches('[readonly], [disabled]')
+     );
+
+     candidates.sort((a, b) => {
+       const ar = a.getBoundingClientRect();
+       const br = b.getBoundingClientRect();
+       return (br.width * br.height) - (ar.width * ar.height);
+     });
+
+     return candidates[0] || null;
+   }
+
+   function readComposer(el = getComposer()) {
+     if (!el) return '';
+     if ('value' in el) return el.value || '';
+     return el.innerText || el.textContent || '';
+   }
+
+   function setComposerText(el, value) {
+     if (!el) return false;
+
+     el.focus();
+
+     if ('value' in el) {
+       const proto = el instanceof HTMLTextAreaElement
+         ? HTMLTextAreaElement.prototype
+         : HTMLInputElement.prototype;
+
+       const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
+
+       if (setter) setter.call(el, value);
+       else el.value = value;
+
+       el.dispatchEvent(new InputEvent('input', {
+         bubbles: true,
+         inputType: 'insertText',
+         data: value
+       }));
+
+       el.dispatchEvent(new Event('change', { bubbles: true }));
+     } else {
+       el.textContent = value;
+
+       el.dispatchEvent(new InputEvent('input', {
+         bubbles: true,
+         inputType: 'insertText',
+         data: value
+       }));
+     }
+
+     return true;
+   }
+
+   // Kimi's send icon is inside a DIV, not necessarily a BUTTON.
+   // Prefer the exact markup supplied by the user.
+   function findSendControl() {
+     const icons = [
+       ...document.querySelectorAll(
+         'svg.send-icon[name="Send"], svg.send-icon, svg[name="Send"]'
+       )
+     ];
+
+     for (const icon of icons) {
+       if (!isVisible(icon) || icon.closest(DIALOG_SELECTOR)) continue;
+
+       const container = icon.closest('.send-button-container');
+       if (container && isVisible(container)) {
+         const disabled = container.getAttribute('aria-disabled') === 'true' ||
+           container.classList.contains('disabled');
+
+         if (!disabled) return container;
+       }
+
+       // Fallback in case Kimi changes the wrapper structure.
+       const interactive = icon.closest(
+         'button, [role="button"], [tabindex], [data-testid*="send"]'
+       );
+
+       if (interactive && isVisible(interactive)) {
+         if (interactive.disabled ||
+             interactive.getAttribute('aria-disabled') === 'true') {
+           continue;
+         }
+         return interactive;
+       }
+     }
+
+     // Last resort: known send buttons, if the site uses one.
+     const buttons = document.querySelectorAll(
+       'button[data-testid*="send"], button[aria-label*="send" i], button[type="submit"]'
+     );
+
+     for (const button of buttons) {
+       if (
+         isVisible(button) &&
+         !button.disabled &&
+         button.getAttribute('aria-disabled') !== 'true' &&
+         !button.closest(DIALOG_SELECTOR)
+       ) {
+         return button;
+       }
+     }
+
+     return null;
+   }
+
+   function clickControl(control) {
+     if (!control || !isVisible(control)) return false;
+
+     try {
+       control.scrollIntoView({ block: 'nearest' });
+       control.click();
+       return true;
+     } catch (error) {
+       log('Click failed:', error);
+       return false;
+     }
+   }
+
+   function captureMessage(reason) {
+     const text = readComposer().trim();
+
+     if (!text) {
+       log(`Could not capture message (${reason}): composer is empty.`);
+       return;
+     }
+
+     savedMessage = text;
+     retryCount = 0;
+     lastSubmitAt = Date.now();
+
+     if (retryTimer) clearTimeout(retryTimer);
+     retryTimer = null;
+
+     log(`Captured message (${reason}); length: ${text.length}.`);
+   }
+
+   // Capture before the site's own click handler clears the composer.
+   document.addEventListener('click', event => {
+     const target = event.target instanceof Element ? event.target : null;
+     if (!target) return;
+
+     const sendControl = target.closest(
+       '.send-button-container, svg.send-icon, svg[name="Send"]'
+     );
+
+     if (sendControl && findSendControl()?.contains(target)) {
+       captureMessage('Send click');
+     } else if (sendControl && sendControl.matches('.send-button-container')) {
+       captureMessage('Send container click');
+     }
+   }, true);
+
+   document.addEventListener('keydown', event => {
+     if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+
+     const composer = getComposer();
+     if (composer && (
+       event.target === composer || composer.contains(event.target)
+     )) {
+       captureMessage('Enter key');
+     }
+   }, true);
+
+   document.addEventListener('submit', event => {
+     if (event.target instanceof HTMLFormElement) {
+       captureMessage('Form submit');
+     }
+   }, true);
+
+   function findCapacityDialog() {
+     for (const dialog of document.querySelectorAll(DIALOG_SELECTOR)) {
+       if (
+         isVisible(dialog) &&
+         norm(dialog.innerText).includes(CAPACITY_TEXT)
+       ) {
+         return dialog;
+       }
+     }
+
+     return null;
+   }
+
+   function findGotIt(dialog) {
+     const byTestId = dialog.querySelector(
+       '[data-testid="confirm-dialog-cancel"]'
+     );
+
+     if (byTestId && isVisible(byTestId) && !byTestId.disabled) {
+       return byTestId;
+     }
+
+     for (const button of dialog.querySelectorAll('button')) {
+       if (
+         norm(button.innerText) === 'Got it' &&
+         isVisible(button) &&
+         !button.disabled
+       ) {
+         return button;
+       }
+     }
+
+     return null;
+   }
+
+   function scheduleRetry() {
+     if (retryTimer) clearTimeout(retryTimer);
+
+     if (retryCount >= MAX_RETRIES) {
+       log(`Stopped after ${MAX_RETRIES} retries. No more automatic submissions.`);
+       return;
+     }
+
+     retryCount += 1;
+
+     const delay = Math.min(
+       FIRST_RETRY_DELAY_MS * (2 ** (retryCount - 1)),
+       MAX_RETRY_DELAY_MS
+     );
+
+     log(`Capacity error detected. Retry ${retryCount}/${MAX_RETRIES} in ${Math.round(delay / 1000)} seconds.`);
+
+     retryTimer = setTimeout(() => {
+       retryTimer = null;
+       retryOriginalMessage();
+     }, delay);
+   }
+
+   function retryOriginalMessage() {
+     if (!savedMessage) {
+       log('No saved message; cannot retry.');
+       return;
+     }
+
+     // Do not send while the capacity dialog is still open.
+     if (findCapacityDialog()) {
+       log('Capacity dialog is still open; waiting for it to close.');
+       return;
+     }
+
+     const composer = getComposer();
+
+     if (!composer) {
+       log('Could not find the message composer. Retry stopped.');
+       return;
+     }
+
+     const currentText = readComposer(composer).trim();
+
+     // Avoid replacing text the user has entered since the last attempt.
+     if (currentText && currentText !== savedMessage) {
+       log('A different draft is in the composer. Stopped to protect it.');
+       return;
+     }
+
+     if (!currentText) {
+       setComposerText(composer, savedMessage);
+     }
+
+     setTimeout(() => {
+       if (findCapacityDialog()) {
+         log('Dialog reappeared before sending; waiting for its handler.');
+         return;
+       }
+
+       const control = findSendControl();
+
+       if (!control) {
+         log('Could not find the send control. Check the page markup.');
+         return;
+       }
+
+       log('Found send control:', control.className || control.tagName);
+
+       lastSubmitAt = Date.now();
+
+       if (clickControl(control)) {
+         log('Clicked Kimi send control.');
+       } else {
+         log('Could not click the send control.');
+       }
+     }, 400);
+   }
+
+   function handleCapacityDialog() {
+     if (handlingDialog) return;
+
+     const dialog = findCapacityDialog();
+     if (!dialog) return;
+
+     if (!savedMessage || Date.now() - lastSubmitAt > 30 * 60 * 1000) {
+       log('Capacity dialog detected, but there is no recent saved message. Not retrying.');
+       return;
+     }
+
+     const gotIt = findGotIt(dialog);
+
+     if (!gotIt) {
+       log('Capacity dialog found, but its Got it button was not found.');
+       return;
+     }
+
+     handlingDialog = true;
+     log('Capacity dialog detected. Clicking Got it.');
+
+     clickControl(gotIt);
+
+     setTimeout(() => {
+       handlingDialog = false;
+
+       if (!findCapacityDialog()) {
+         scheduleRetry();
+       } else {
+         log('Dialog is still present; will check again.');
+       }
+     }, 500);
+   }
+
+   const observer = new MutationObserver(handleCapacityDialog);
+
+   function init() {
+     observer.observe(document.documentElement, {
+       childList: true,
+       subtree: true,
+       characterData: true
+     });
+
+     setInterval(handleCapacityDialog, 800);
+
+     log('Loaded. Waiting for a message and Kimi capacity errors.');
+     log('Send icon found:', !!findSendControl());
+   }
+
+   init();
+ })();
