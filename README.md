@@ -8,7 +8,7 @@ These scripts automate visible website controls. They do not provide paid access
 
 | Script | Service | What it does |
 |---|---|---|
-| [Chaython's ChatGPT Auto Continue](./Chaython%27s%20ChatGPT%20Auto%20Continue.user.js) | [ChatGPT](https://chatgpt.com/) | Clicks ChatGPT's visible **Continue** control when a response has stopped, with a per-response limit to prevent an endless loop. |
+| [Chaython's ChatGPT Auto Continue](./Chaython%27s%20ChatGPT%20Auto%20Continue.user.js) | [ChatGPT](https://chatgpt.com/) | Clicks the visible **Continue** control when available; if it is absent and the answer appears cut off mid-thought, waits and submits `continue` in an empty composer. Limited to 8 attempts per response. |
 | [Chaython's Kimi K3 Auto Retry](./Chaython%27s%20Kimi%20K3%20Auto%20Retry) | [Kimi](https://www.kimi.ai/) | Detects Kimi's “Too many people are chatting with Kimi” dialog, dismisses it, and retries the captured prompt. |
 | [Chaython's Z.ai Auto Retry](./Chaython%27s%20Z.ai%20Auto%20Retry.user.js) | [Z.ai](https://chat.z.ai/) | Detects a Z.ai capacity/overload warning, dismisses it, and retries the last prompt. |
 
