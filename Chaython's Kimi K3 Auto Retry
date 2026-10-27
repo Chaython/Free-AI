@@ -5,9 +5,10 @@
 // @author       Chaython
 // @description  Automatically dismisses Kimi capacity warnings and retries your message.
 // @icon         data:image/webp;base64,UklGRtIEAABXRUJQVlA4IMYEAACQJgCdASrYANgAPp1KokulpCOho7aKeLATiWdu4Wo17mM/+TG+s8IZoE/ZdrccYSvzL9ADzcuo59ADpWf3DylfxR/m5wHfB2AN6d7f5jdxRxpBgD/U8q3037B/639Wn9yCJPh3LxIMdUTYGt24kCm430HQA+TNW1X3mwALMAse+PsZCMsxAA2z+0Oo6qgX2dPjLdQk9S1XPX9bbY7nEtmSSr/Py1FG251i1ZgwnYA66UjJW42lJpQ+mdL3poVQihM4WFv8vLQbHSALDPVHcZyx24gpBsUUoQjQ4LcWj5RikeMuKGQy0tUfaU5zwZQg0alT765tpq/Cr80i7qPjcdmEE97uEDJom8pENo39AKGzjUfauR8rKnGFMnVCeDRwZ4ccy5BtUae4h27LMzflc5QShrk2uoIBTDuZaSOwAAD+/VdI/moUXbSkALxHJ4wXV9O76LHWbk/VpfmhsE4TWV29ybcpxbvvFku69HniQ8oLq4febAkmehSBc/kMdY4z0Z9vNeJFQnF4ivxyU0b1bcjG0Te/dm1IJuU/s4LbnNRFNPWA6nAVA4ixdrxturVJlXCsHTjZIgt5fwQYvV/A+LgiUuY02RgHpXqiK/RA2DMtfeOgkzsFDKatf4CYc9/8JdLyjyO08VARBq+DPlXwWEbBvgAdRe5WBW9ubUH1fPPTeXdkZxfgiPZaIrKXq/njN9BvhGwP/cdLRVDp8uAkOAvPAlUDt9mwHT+S76BnEkgeXC1l/HwRRga0qq8SxMpnp2mC9jY1xltK17D/3jON9KoJmC+Za0xQukSdXZqQt1+GHpOU+YQ0KqZgm56OZqij/ZjgpMfNelubnkr3zOu3NZybFG7L9KrIu3R+uz1M/U1VO4T0Qr7PeSZVPjfixpd6TqSEHNmPVQFfxHaLfflH9aFMrM0eW2em/zi+pK1zePAqBMpsEDN3hcwgGBY/fh33mkx54LBRijl18DRSJ/UzxZc7sYLcTUTyhSlz9oShs50zLWttLX56IGQC+kbTEYy4J0JRfAkf5VdpDUVs50hOfjVYc6d4H+2EcJjRkCpjyksQNsoOS3anch2PISZ1jAm4OV+S5n4gIAEDSee9p5n3upqh/ysoJfJXD3a24Sry6HM0qPvb7Kg9VpWBlWm1lemljMJRexrOh1QDBCY+DkjeT45IekzAiEJciBO2LkLxeDwplcvET+VtPA53S+pLU3kQ0xl8A+eh4e9wn664Mtv8DTZNfxmEXri1cHne7528jARyWn01Hw6mHHyf6Y/UouoUaucX8mNP4a2gB4JylaqJTnO84Ab0fGwnKkGxvxxtYU24cN771hSQPDW7XMDz8co7yJeiiv1Kia70SWq9rZTwKqks3we8dftr4f9aqO5l9yovcxkFWVy0RTMZlDZ5mb3jihrJRcqO3l8b7LyuG3P+Neq0lGLhEWQICOzNPh9OMLI1kWIwTqW8R7LW+9bzBhPCC/kh//6bKWPwHfAGSYUQ9UBLjHXKPVkYpB8LlYri3Z7IUYLG6itkRx/icOrPO/rsjzLDcgzEHEUrZzSsM/xGE4i/XWE4RsqTlzqXDITQS+0IAAol/e6g2D3T4C3EhWC8KMhgkWukHPjA3NShwVP9MLbhc5wAAAAA
-// @homepageURL  https://github.com/Chaython
 // @match        https://www.kimi.ai/*
 // @run-at       document-idle
+// @updateURL    https://raw.githubusercontent.com/Chaython/Free-AI/main/Chaython%27s%20Kimi%20K3%20Auto%20Retry
+// @downloadURL  https://raw.githubusercontent.com/Chaython/Free-AI/main/Chaython%27s%20Kimi%20K3%20Auto%20Retry
 // @grant        none
 // ==/UserScript==
 
