@@ -4,10 +4,11 @@
 // @version      1.0.0
 // @author       Chaython
 // @description  Dismisses Z.ai capacity warnings and retries the last prompt with bounded backoff.
-// @homepageURL  https://github.com/Chaython
 // @match        https://chat.z.ai/*
 // @match        https://z.ai/*
 // @run-at       document-idle
+// @updateURL    https://raw.githubusercontent.com/Chaython/Free-AI/main/Chaython%27s%20Z.ai%20Auto%20Retry.user.js
+// @downloadURL  https://raw.githubusercontent.com/Chaython/Free-AI/main/Chaython%27s%20Z.ai%20Auto%20Retry.user.js
 // @grant        none
 // ==/UserScript==
 
